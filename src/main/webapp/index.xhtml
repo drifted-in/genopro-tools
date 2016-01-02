@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+
+<!--
+Copyright (c) 2015-present Jan Tošovský <jan.tosovsky.cz@gmail.com>
+ 
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <f:view>
+        <h:head>
+            <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" />
+            <style type="text/css">
+                body, .ui-widget, .ui-widget .ui-widget {
+                    font-family: 'Open Sans';
+                    font-size: 95%;
+                }
+                .ui-notificationbar {
+                    z-index: 1;
+                    height: 50px;
+                    font-size: 21px;
+                    text-align: center;
+                    background-color: lightyellow;
+                }
+                .buttonClose {
+                    margin-right: 20px;
+                }
+            </style>
+            <title>Ancestor Tree</title>            
+        </h:head>
+        <h:body>
+
+            <p:notificationBar effect="none" position="top" widgetVar="bar">
+                <h:panelGrid columns="3" width="100%">
+                    <p:commandButton styleClass="buttonClose" icon="close" onclick="PF('bar').hide();" />
+                    <h:panelGroup id="message">Only <a href="http://getfirefox.com">Firefox</a> or <a href="http://www.google.com/chrome">Chrome</a> is supported.</h:panelGroup>
+                    <p:commandButton styleClass="buttonClose" icon="close" onclick="PF('bar').hide();" />
+                </h:panelGrid>
+            </p:notificationBar>
+
+            <h2>Ancestor Tree</h2>
+
+            <h3>Motivation</h3>
+
+            <p>If you store family trees in separate GenoPro files and you need 
+                to create a report across all of them, the only solution so far 
+                is to merge all files into a single one. If your tree is quite 
+                large, covering various families and from various reasons such an 
+                operation is not an option, you can still generate reports using 
+                my app, which merges individual files virtually.</p>
+
+            <h3>Usage</h3>
+
+            <ol>
+                <li>Choose and upload GenoPro (.gno) file(s)</li>
+                <li>Wait for updating the list of individuals</li>
+                <li>Select an individual from the list</li>
+                <li>Set number of generations (if more are available, a dot is displayed outside the wheel)</li>
+                <li>Generate the output</li>
+                <li>Tweak the output in e.g. <a href="https://inkscape.org/">Inkscape</a> editor</li>
+            </ol>
+
+            <p>If the output has to be generated from multiple GenoPro files, 
+                they need to be mutually hyperlinked. The linked person has to be 
+                present in both files with three matching attributes - 
+                first name, last name and birth date. All files are supposed to 
+                be located in the same folder, so the external hyperlinks contain
+                just a GenoPro file name (e.g. family.gno), see 
+                <a href="">examples</a>.</p>
+
+            <p>Individuals are sorted by their IDs, prefixed with the file name. 
+                This ID can be found in GenoPro's individual properties dialog, 
+                in the Family tab (Permanent ID).</p>
+
+            <p>You can test generating outputs using a default dataset. Please 
+                choose ind00001 as base individual in this case.</p> 
+                
+            <h3>Source File(s)</h3>
+
+            <h:form id="upload" enctype="multipart/form-data">
+
+                <p:fileUpload id="fileUpload"
+                              widgetVar="myFileUploader"
+                              onstart="options:setFilesCount([{name:'filesCount', value: PF('myFileUploader').files.length}]);"
+                              fileUploadListener="#{ancestorTreeBean.handleFileUpload}"
+                              mode="advanced"
+                              multiple="true"
+                              sizeLimit="3000000"
+                              allowTypes="/(\.|\/)(xml|gno)$/"/>
+
+                <h:message for="fileUpload" styleClass="validatingError" />
+
+            </h:form>
+
+            <h:form id="options" target="_blank">
+
+                <p:remoteCommand name="setFilesCount" action="#{ancestorTreeBean.setActualFilesCount}" />
+
+                <p:commandButton styleClass="button" 
+                                 ajax="false" 
+                                 rendered="#{!ancestorTreeBean.useSampleSource}" 
+                                 action="#{ancestorTreeBean.resetSource}" 
+                                 value="Use Sample Data"/>
+
+                <h3>Options</h3>
+
+                <h:panelGrid columns="2">
+                    Base Individual:
+                    <p:selectOneMenu id="individuals" value="#{ancestorTreeBean.currentId}" >
+                        <f:selectItems value="#{ancestorTreeBean.individualList}"/>
+                    </p:selectOneMenu>
+
+                    Generations:
+                    <p:selectOneMenu id="generations" value="#{ancestorTreeBean.generations}" >
+                        <f:selectItem itemValue="3" itemLabel="3"/>
+                        <f:selectItem itemValue="4" itemLabel="4"/>
+                        <f:selectItem itemValue="5" itemLabel="5"/>
+                        <f:selectItem itemValue="6" itemLabel="6"/>
+                        <f:selectItem itemValue="7" itemLabel="7"/>
+                        <f:selectItem itemValue="8" itemLabel="8"/>
+                    </p:selectOneMenu>
+                </h:panelGrid>
+
+                <p:commandButton action="#{ancestorTreeBean.generate}" 
+                                 ajax="false"
+                                 value="Generate Ancestor Tree"/>
+
+            </h:form>
+
+            <script type="text/javascript">
+                //<![CDATA[
+                document.addEventListener('DOMContentLoaded', function () {
+
+                    var userAgent = navigator.userAgent.toLowerCase();
+
+                    if (!((/chrome/.test(userAgent) && !/edge/.test(userAgent)) || /firefox/.test(userAgent))) {
+                        PF('bar').show();
+                    }
+                });
+                //]]>
+            </script>            
+        </h:body>        
+    </f:view>
+</html>
