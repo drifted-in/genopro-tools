@@ -19,10 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
    xmlns:xs="http://www.w3.org/2001/XMLSchema" exclude-result-prefixes="xs" version="2.0">
    
-   <!--
-      burket.gno is not reliable
-   -->
-   <xsl:param name="parts">hasek.xml;svorc.xml;forejtek.xml;marek.xml</xsl:param>
+   <xsl:param name="parts"/>
    
    <xsl:template match="/">
       <GenoPro>           
