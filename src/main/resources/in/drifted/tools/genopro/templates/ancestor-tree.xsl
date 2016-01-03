@@ -21,11 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
    exclude-result-prefixes="xs math" version="2.0">
 
    <xsl:output indent="yes"/>
-
-   <xsl:param name="baseId">tosovsky.xml-ind00093</xsl:param>
-
+   
+   <xsl:param name="baseId"/>
+   
    <xsl:key name="individual" match="Individual" use="@ID"/>
-   <xsl:key name="hyperlink" match="Individual" use="@IndividualInternalHyperlink"/>
+   <xsl:key name="hyperlink-internal" match="Individual" use="@IndividualInternalHyperlink"/>
    <xsl:key name="family" match="PedigreeLink[@PedigreeLink!='Parent']" use="@Individual"/>
    <xsl:key name="parent" match="PedigreeLink[@PedigreeLink='Parent']" use="@Family"/>
    <xsl:key name="marriage" match="Marriage" use="@ID"/>
@@ -52,16 +52,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
    <xsl:template name="getTree">
       <xsl:param name="id"/>
       <xsl:param name="second-run" select="0"/>
+      <xsl:param name="originalId"/>
 
       <xsl:variable name="individual" select="key('individual', $id)"/>
 
       <xsl:choose>
          <xsl:when test="$individual/Hyperlink and $second-run != 1">
+            <xsl:variable name="xref"
+               select="//Individual[starts-with(@ID, substring-before($individual/Hyperlink, '.gno')) and Name/First=$individual/Name/First and Name/Last=$individual/Name/Last and Birth/Date=$individual/Birth/Date]/@ID"/>
+            
             <xsl:call-template name="getTree">
                <xsl:with-param name="second-run" select="1"/>
                <xsl:with-param name="id">
-                  <xsl:variable name="xref"
-                     select="//Individual[starts-with(@ID, substring-before($individual/Hyperlink, '.gno')) and Name/First=$individual/Name/First and Name/Last=$individual/Name/Last and Birth/Date=$individual/Birth/Date]/@ID"/>
                   <xsl:choose>
                      <xsl:when test="$xref">
                         <xsl:value-of select="$xref"/>
@@ -71,20 +73,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                      </xsl:otherwise>
                   </xsl:choose>
                </xsl:with-param>
+               <xsl:with-param name="originalId">
+                  <xsl:if test="$xref">
+                     <xsl:value-of select="$id"/>
+                  </xsl:if>                  
+               </xsl:with-param>
             </xsl:call-template>
          </xsl:when>
          <xsl:otherwise>
-            <xsl:variable name="hyperlink" select="key('hyperlink', $id)"/>
-            <xsl:variable name="hyperlink-reverse"
+            <xsl:variable name="hyperlink-internal" select="key('hyperlink-internal', $id)"/>
+            <xsl:variable name="hyperlink-internal-reverse"
                select="key('individual', $individual/@IndividualInternalHyperlink)"/>
 
             <xsl:variable name="infoNode">
                <xsl:choose>
-                  <xsl:when test="$hyperlink and $hyperlink/Gender">
-                     <xsl:copy-of select="$hyperlink"/>
+                  <xsl:when test="$hyperlink-internal and $hyperlink-internal/Gender">
+                     <xsl:copy-of select="$hyperlink-internal"/>
                   </xsl:when>
-                  <xsl:when test="$hyperlink-reverse and $hyperlink-reverse/Gender">
-                     <xsl:copy-of select="$hyperlink-reverse"/>
+                  <xsl:when test="$hyperlink-internal-reverse and $hyperlink-internal-reverse/Gender">
+                     <xsl:copy-of select="$hyperlink-internal-reverse"/>
                   </xsl:when>
                   <xsl:otherwise>
                      <xsl:copy-of select="$individual"/>
@@ -101,8 +108,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </xsl:call-template>
                </info>
 
-               <xsl:variable name="family"
-                  select="key('family', $individual/@ID) | key('family', $hyperlink/@ID) | key('family', $hyperlink-reverse/@ID)"/>
+               <xsl:variable name="family">
+                  <xsl:choose>
+                     <xsl:when test="$originalId">
+                        <xsl:copy-of select="
+                           key('family', $originalId) |
+                           key('family', $individual/@ID) | 
+                           key('family', $hyperlink-internal/@ID) | 
+                           key('family', $hyperlink-internal-reverse/@ID)"/>
+                     </xsl:when>
+                     <xsl:otherwise>
+                        <xsl:copy-of select="
+                           key('family', $individual/@ID) | 
+                           key('family', $hyperlink-internal/@ID) | 
+                           key('family', $hyperlink-internal-reverse/@ID)"/>                        
+                     </xsl:otherwise>
+                  </xsl:choose>                  
+               </xsl:variable>
+               
                <xsl:variable name="marriage" select="key('marriage', $family/Unions[1])"/>
 
                <parentInfo>
@@ -111,7 +134,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </xsl:call-template>
                </parentInfo>
 
-               <xsl:for-each select="key('parent', $family/@Family)">
+               <xsl:for-each select="key('parent', $family/PedigreeLink/@Family)">
                   <xsl:call-template name="getTree">
                      <xsl:with-param name="id" select="@Individual"/>
                   </xsl:call-template>
