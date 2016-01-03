@@ -81,7 +81,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <xsl:variable name="generation" select="count(ancestor::individual)" as="xs:integer"/>
       <xsl:variable name="correction" as="xs:integer">
          <xsl:choose>
-            <xsl:when test="@gender = 'M'">0</xsl:when>
+            <xsl:when test="$generation = 0 or @gender = 'M'">0</xsl:when>
             <xsl:otherwise>1</xsl:otherwise>
          </xsl:choose>
       </xsl:variable>
