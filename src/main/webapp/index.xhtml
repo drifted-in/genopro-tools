@@ -73,7 +73,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <li>Wait for updating the list of individuals</li>
                 <li>Select an individual from the list</li>
                 <li>Set number of generations (if more are available, a dot is displayed outside the wheel)</li>
-                <li>Generate the output</li>
+                <li>Generate the output (suited for A3 paper size)</li>
                 <li>Tweak the output in e.g. <a href="https://inkscape.org/">Inkscape</a> editor</li>
             </ol>
 
@@ -91,7 +91,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
             <p>You can test generating outputs using a default dataset. Please 
                 choose ind00001 as base individual in this case.</p> 
-                
+
+            <h3>Data Security</h3>
+
+            <p>Any uploaded data is deleted after 30 minutes of inactivity. As 
+                the server system is regularly updated, there is a very low risk it
+                can be compromised by attacker via any known security hole.</p>
+
+            <p>As secure http (https) is not employed on the server, there is 
+                a potential risk your uploaded data can be eavesdropped by a third 
+                party between two endpoints during the transport.</p>
+
+            <p>The most secure way is to <a href="https://github.com/drifted-in/genopro-tools">build 
+                    the app from source code</a> and run it locally on your computer :-)</p>
+
+            <h3>Feedback</h3>
+
+            <p>If you encounter any bug or you would like to have any new 
+                feature implemented, feel free to <a href="https://github.com/drifted-in/genopro-tools/issues">create
+                    a issue</a> on project pages.</p>
+
             <h3>Source File(s)</h3>
 
             <h:form id="upload" enctype="multipart/form-data">
