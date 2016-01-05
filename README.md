@@ -11,7 +11,7 @@ How to build
   * Ensure that JDK 7+ is available on your system.
   * Open this Maven based project in your favorite IDE.
   * Build project.
-  * Deploy the final war file into Java Servlet 3.0+ container, e.g. Apache Tomcat 8
+  * Deploy the final war file into Java Servlet 3.0+ container, e.g. Apache Tomcat 8.
 
 How it works
 ============
@@ -19,17 +19,17 @@ How it works
      * GenoPro XML files can be uploaded as well, they are passed for further processing directly.
      * GenoPro GNO files are just compressed XML files with GNO extension.
 
-  2. If multiple data files are specified, they are [merged](/tree/master/src/main/resources/in/drifted/tools/genopro/templates/merge.xslt) into a single XML file.
+  2. If multiple data files are specified, they are [merged](../../tree/master/src/main/resources/in/drifted/tools/genopro/templates/merge.xslt) into a single XML file.
      * This merged file contains just elements required for further processing.
      * It has modified IDs to avoid clashes.
      * It is not compatible with GenoPro XML format any more.
 
-  3. In case of Ancestor Tree the source data is [transformed](/tree/master/src/main/resources/in/drifted/tools/genopro/templates/ancestor-tree.xslt) into a custom XML tree that contains all ancestors of selected individual.
+  3. In case of Ancestor Tree the source data is [transformed](../../tree/master/src/main/resources/in/drifted/tools/genopro/templates/ancestor-tree.xslt) into a custom XML tree that contains all ancestors of selected individual.
      * This custom XML format contains just basic info about each individual.
      * If separate family trees are hyperlinked in the original source files, they are treated as a single continuous tree.
      * The result is a ideal base for various outputs, even graphical, see the next step.
 
-  4. In case of Ancestor Tree the final XML file is [transformed](/tree/master/src/main/resources/in/drifted/tools/genopro/templates/svg.xslt) into SVG chart.
+  4. In case of Ancestor Tree the final XML file is [transformed](../../tree/master/src/main/resources/in/drifted/tools/genopro/templates/svg.xslt) into SVG chart.
      * In the web application there is the only option 'Generations', which can be set up to 8.
      * Template itself supports other ones:
          * width - by default `420` (width of A3 paper size, the height is half of the width)
