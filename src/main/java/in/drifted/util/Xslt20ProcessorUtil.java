@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (c) 2015-present Jan Tošovský <jan.tosovsky.cz@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ public class Xslt20ProcessorUtil {
         boolean result = false;
 
         try {
-            
+
             Source source = new StreamSource(xsltInputStream);
             Transformer transformer = TransformerFactory.newInstance().newTemplates(source).newTransformer();
 

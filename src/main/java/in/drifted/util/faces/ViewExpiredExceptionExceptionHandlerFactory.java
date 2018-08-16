@@ -29,7 +29,7 @@ public class ViewExpiredExceptionExceptionHandlerFactory extends ExceptionHandle
 
     @Override
     public ExceptionHandler getExceptionHandler() {
-        
+
         ExceptionHandler result = parent.getExceptionHandler();
         result = new ViewExpiredExceptionExceptionHandler(result);
 

@@ -41,7 +41,7 @@ public class ViewExpiredExceptionExceptionHandler extends ExceptionHandlerWrappe
 
     @Override
     public void handle() throws FacesException {
-        
+
         for (Iterator<ExceptionQueuedEvent> i = getUnhandledExceptionQueuedEvents().iterator(); i.hasNext();) {
             ExceptionQueuedEvent event = i.next();
             ExceptionQueuedEventContext context = (ExceptionQueuedEventContext) event.getSource();
