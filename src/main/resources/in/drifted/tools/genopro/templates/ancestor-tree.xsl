@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 Copyright (c) 2015-present Jan Tošovský <jan.tosovsky.cz@gmail.com>
- 
+
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -21,9 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
    exclude-result-prefixes="xs math" version="2.0">
 
    <xsl:output indent="yes"/>
-   
+
    <xsl:param name="baseId"/>
-   
+
    <xsl:key name="individual" match="Individual" use="@ID"/>
    <xsl:key name="hyperlink-internal" match="Individual" use="@IndividualInternalHyperlink"/>
    <xsl:key name="family" match="PedigreeLink[@PedigreeLink!='Parent']" use="@Individual"/>
@@ -60,7 +60,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
          <xsl:when test="$individual/Hyperlink and $second-run != 1">
             <xsl:variable name="xref"
                select="//Individual[starts-with(@ID, substring-before($individual/Hyperlink, '.gno')) and Name/First=$individual/Name/First and Name/Last=$individual/Name/Last and Birth/Date=$individual/Birth/Date]/@ID"/>
-            
+
             <xsl:call-template name="getTree">
                <xsl:with-param name="second-run" select="1"/>
                <xsl:with-param name="id">
@@ -76,7 +76,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                <xsl:with-param name="originalId">
                   <xsl:if test="$xref">
                      <xsl:value-of select="$id"/>
-                  </xsl:if>                  
+                  </xsl:if>
                </xsl:with-param>
             </xsl:call-template>
          </xsl:when>
@@ -99,48 +99,58 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                </xsl:choose>
             </xsl:variable>
 
-            <individual gender="{$infoNode/Individual/Gender}">
-
+            <xsl:variable name="info">
                <info>
                   <xsl:call-template name="getInfo">
                      <!-- hyperlinks have reduced info -->
                      <xsl:with-param name="individual" select="$infoNode/Individual"/>
                   </xsl:call-template>
                </info>
+            </xsl:variable>
 
-               <xsl:variable name="family">
-                  <xsl:choose>
-                     <xsl:when test="$originalId">
-                        <xsl:copy-of select="
-                           key('family', $originalId) |
-                           key('family', $individual/@ID) | 
-                           key('family', $hyperlink-internal/@ID) | 
-                           key('family', $hyperlink-internal-reverse/@ID)"/>
-                     </xsl:when>
-                     <xsl:otherwise>
-                        <xsl:copy-of select="
-                           key('family', $individual/@ID) | 
-                           key('family', $hyperlink-internal/@ID) | 
-                           key('family', $hyperlink-internal-reverse/@ID)"/>                        
-                     </xsl:otherwise>
-                  </xsl:choose>                  
-               </xsl:variable>
-               
-               <xsl:variable name="marriage" select="key('marriage', $family/Unions[1])"/>
+            <xsl:variable name="family">
+               <xsl:choose>
+                  <xsl:when test="$originalId">
+                     <xsl:copy-of select="
+                        key('family', $originalId) |
+                        key('family', $individual/@ID) |
+                        key('family', $hyperlink-internal/@ID) |
+                        key('family', $hyperlink-internal-reverse/@ID)"/>
+                  </xsl:when>
+                  <xsl:otherwise>
+                     <xsl:copy-of select="
+                        key('family', $individual/@ID) |
+                        key('family', $hyperlink-internal/@ID) |
+                        key('family', $hyperlink-internal-reverse/@ID)"/>
+                  </xsl:otherwise>
+               </xsl:choose>
+            </xsl:variable>
 
+            <xsl:variable name="marriage" select="key('marriage', $family/Unions[1])"/>
+
+            <xsl:variable name="parentInfo">
                <parentInfo>
                   <xsl:call-template name="getParentInfo">
                      <xsl:with-param name="marriage" select="$marriage"/>
                   </xsl:call-template>
                </parentInfo>
+            </xsl:variable>
 
-               <xsl:for-each select="key('parent', $family/PedigreeLink/@Family)">
-                  <xsl:call-template name="getTree">
-                     <xsl:with-param name="id" select="@Individual"/>
-                  </xsl:call-template>
-               </xsl:for-each>
+            <xsl:if test="normalize-space($info) != '' or normalize-space($parentInfo) != ''">
 
-            </individual>
+               <individual gender="{$infoNode/Individual/Gender}">
+
+                  <xsl:copy-of select="$info"/>
+                  <xsl:copy-of select="$parentInfo"/>
+
+                  <xsl:for-each select="key('parent', $family/PedigreeLink/@Family)">
+                     <xsl:call-template name="getTree">
+                        <xsl:with-param name="id" select="@Individual"/>
+                     </xsl:call-template>
+                  </xsl:for-each>
+
+               </individual>
+            </xsl:if>
          </xsl:otherwise>
       </xsl:choose>
 
