@@ -165,7 +165,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                <xsl:with-param name="angleEnd" select="$angleEnd"/>
             </xsl:call-template>
 
-            <xsl:if test="$generation = $generations and $hasChildren">
+            <xsl:if test="$generation = $generations and $hasChildren = 1">
                <xsl:variable name="cx" select="d:round(($step * 0.2 + $radiusOuter) * math:cos($angleMiddle))" as="xs:double"/>
                <xsl:variable name="cy" select="d:round(($step * 0.2 + $radiusOuter) * math:sin($angleMiddle))" as="xs:double"/>
                <svg:circle cx="{$cx}" cy="{-$cy}" r="{$size div (125 * $generations)}"/>
