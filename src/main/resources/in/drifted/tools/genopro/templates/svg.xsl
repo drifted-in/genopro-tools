@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 Copyright (c) 2015-present Jan Tošovský <jan.tosovsky.cz@gmail.com>
- 
+
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -58,7 +58,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             }
             circle {
                fill: <xsl:value-of select="$grid-color"/>;
-            }            
+            }
             text{
                font: <xsl:value-of select="$font-size"/>px <xsl:value-of select="$font-family"/>;
             }
@@ -78,28 +78,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
    <xsl:template match="individual">
       <xsl:param name="n"/>
-      <xsl:variable name="generation" select="count(ancestor::individual)" as="xs:integer"/>
-      <xsl:variable name="correction" as="xs:integer">
-         <xsl:choose>
-            <xsl:when test="$generation = 0 or @gender = 'M'">0</xsl:when>
-            <xsl:otherwise>1</xsl:otherwise>
-         </xsl:choose>
-      </xsl:variable>
-      <xsl:variable name="segment" select="$n * 2 + $correction" as="xs:integer"/>
-      <xsl:call-template name="renderSegment">
-         <xsl:with-param name="generation" select="$generation"/>
-         <xsl:with-param name="segment" select="$segment"/>
-         <xsl:with-param name="content" select="info"/>
-         <xsl:with-param name="hasChildren">
+      <xsl:if test="normalize-space(info) != ''">
+         <xsl:variable name="generation" select="count(ancestor::individual)" as="xs:integer"/>
+         <xsl:variable name="correction" as="xs:integer">
             <xsl:choose>
-               <xsl:when test="individual">1</xsl:when>
-               <xsl:otherwise>0</xsl:otherwise>
+               <xsl:when test="$generation = 0 or @gender = 'M'">0</xsl:when>
+               <xsl:otherwise>1</xsl:otherwise>
             </xsl:choose>
-         </xsl:with-param>
-      </xsl:call-template>
-      <xsl:apply-templates select="individual">
-         <xsl:with-param name="n" select="$segment"/>
-      </xsl:apply-templates>
+         </xsl:variable>
+         <xsl:variable name="segment" select="$n * 2 + $correction" as="xs:integer"/>
+         <xsl:call-template name="renderSegment">
+            <xsl:with-param name="generation" select="$generation"/>
+            <xsl:with-param name="segment" select="$segment"/>
+            <xsl:with-param name="content" select="info"/>
+            <xsl:with-param name="hasChildren">
+               <xsl:choose>
+                  <xsl:when test="individual">1</xsl:when>
+                  <xsl:otherwise>0</xsl:otherwise>
+               </xsl:choose>
+            </xsl:with-param>
+         </xsl:call-template>
+         <xsl:apply-templates select="individual">
+            <xsl:with-param name="n" select="$segment"/>
+         </xsl:apply-templates>
+      </xsl:if>
    </xsl:template>
 
    <xsl:template name="getRadiusOuter">
