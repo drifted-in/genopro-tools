@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (c) 2015-present Jan Tošovský <jan.tosovsky.cz@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,6 @@
  */
 package in.drifted.tools.genopro;
 
-import in.drifted.util.StringUtil;
 import in.drifted.util.Xslt20ProcessorUtil;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,7 +54,7 @@ public class GenoProXmlMerger {
                     InputStream xmlInputStream = Files.newInputStream(sourcePath)) {
 
                 Map<String, Object> parameterMap = new HashMap<>();
-                parameterMap.put("parts", StringUtil.getDelimitedCollection(fileNameList, ";"));
+                parameterMap.put("parts", String.join(";", fileNameList));
 
                 Xslt20ProcessorUtil.transform(xsltInputStream, xmlInputStream, outputStream, parameterMap);
             }
