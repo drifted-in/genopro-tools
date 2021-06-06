@@ -16,9 +16,9 @@
  */
 package in.drifted.tools.genopro;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.zip.ZipInputStream;
@@ -40,7 +40,7 @@ public class FileUtil {
                 try (ZipInputStream zipInputStream = new ZipInputStream(inputStream)) {
 
                     while (zipInputStream.getNextEntry() != null) {
-                        storeFile(zipInputStream, targetPath);
+                        writeFile(zipInputStream, targetPath);
                     }
                 }
                 
@@ -48,15 +48,15 @@ public class FileUtil {
             }
 
             case ".xml": {
-                storeFile(inputStream, targetPath);
+                writeFile(inputStream, targetPath);
                 break;
             }
         }
     }
 
-    private static void storeFile(InputStream inputStream, Path filePath) throws IOException {
+    private static void writeFile(InputStream inputStream, Path filePath) throws IOException {
 
-        try (BufferedOutputStream outputStream = new BufferedOutputStream(Files.newOutputStream(filePath))) {
+        try (OutputStream outputStream = Files.newOutputStream(filePath)) {
 
             byte[] buffer = new byte[32 * 1024];
             int bytesRead;

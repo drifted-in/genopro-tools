@@ -40,8 +40,8 @@ import javax.servlet.http.HttpSessionBindingListener;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
+import org.primefaces.model.file.UploadedFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -55,18 +55,18 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
     private static final String SAMPLE_SOURCE_FILE_NAME = "premysl.gno";
     private static final String SAMPLE_SOURCE_FILE_PATH = Constants.RESOURCES_PATH + "samples/" + SAMPLE_SOURCE_FILE_NAME;
 
-    private transient FileUploadController fileUploadController;
     private transient Path sourcePath;
     private transient Path outputFolderPath;
+    private transient Path tempFolderPath;
     private transient Path ancestorTreePath;
     private transient Path finalPath;
     private transient List<SelectItem> individualList;
     private transient String currentId;
     private transient Boolean useSampleSource;
-    private transient int filesCount;
-    private transient Boolean filesCountReadyToChange;
     private transient int generations;
-
+    private transient int filesCount;
+    private transient Map<String, InputStream> fileStreamMap;
+    
     public AncestorTreeBean() throws IOException {
         initBean();
     }
@@ -75,19 +75,18 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
 
         initOutputFolderPath();
 
-        fileUploadController = new FileUploadController();
         sourcePath = Files.createTempFile("merged-", ".xml");
+        tempFolderPath = Files.createTempDirectory(AncestorTreeBean.class.getName()).toAbsolutePath();
         ancestorTreePath = Files.createTempFile("ancestor-tree-", ".xml");
         finalPath = Files.createTempFile(outputFolderPath, "ancestor-tree-", ".svg");
         individualList = new ArrayList<>();
         currentId = null;
         useSampleSource = true;
-        filesCount = 0;
-        filesCountReadyToChange = true;
         generations = 8;
+        filesCount = 0;
+        fileStreamMap = new HashMap<>();
 
-        initSampleSource();
-        initIndividualList();
+        resetSource();
     }
 
     private void initOutputFolderPath() throws IOException {
@@ -142,7 +141,6 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
 
         if (!individualList.isEmpty()) {
             currentId = individualList.get(0).getValue().toString();
-            RequestContext.getCurrentInstance().update("options");
         }
     }
 
@@ -160,20 +158,19 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
     public void valueUnbound(HttpSessionBindingEvent event) {
 
         try {
-            Files.deleteIfExists(fileUploadController.getTempFolderPath());
             Files.deleteIfExists(sourcePath);
             Files.deleteIfExists(finalPath);
+            Files.deleteIfExists(tempFolderPath);
+
 
         } catch (IOException e) {
         }
     }
 
-    public void setActualFilesCount() {
-        if (filesCountReadyToChange) {
-            Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
-            filesCount = Integer.valueOf(params.get("filesCount"));
-            filesCountReadyToChange = false;
-        }
+    public void setFilesCount() {
+        Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+        filesCount = Integer.valueOf(params.get("filesCount"));
+        fileStreamMap.clear();
     }
 
     public void resetSource() throws IOException {
@@ -184,11 +181,28 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
 
     public void handleFileUpload(FileUploadEvent event) throws IOException {
 
-        try {
-            fileUploadController.storeFile(event);
+        UploadedFile file = event.getFile();
+        String fileName = file.getFileName().toLowerCase();
+        fileStreamMap.put(fileName, file.getInputStream());
+        
+        if (fileStreamMap.size() == filesCount) {
+            Collection<Path> filePathCollection = new ArrayList<>();
+            for (Map.Entry<String, InputStream> entry : fileStreamMap.entrySet()) {
+                try (InputStream inputStream = entry.getValue()) {
+                    Path targetPath = tempFolderPath.resolve(entry.getKey());
+                    FileUtil.storeFile(entry.getKey(), inputStream, targetPath);
+                    filePathCollection.add(targetPath);
+                }   
+            }
+            try (OutputStream outputStream = Files.newOutputStream(sourcePath)) {
+                GenoProXmlMerger.merge(filePathCollection, outputStream);
+            }
+            for (Path filePath : filePathCollection) {
+                Files.deleteIfExists(filePath);
+            }
 
-        } finally {
-            finishImport();
+            initIndividualList();
+            useSampleSource = false;
         }
     }
 
@@ -214,36 +228,6 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
         }
 
         return "/output/" + finalPath.getFileName().toString() + "?faces-redirect=true";
-    }
-
-    private synchronized void finishImport() throws IOException {
-
-        filesCount--;
-
-        if (filesCount <= 0) {
-            mergeFiles();
-            initIndividualList();
-            useSampleSource = false;
-            filesCountReadyToChange = true;
-            filesCount = 0;
-        }
-    }
-
-    private void mergeFiles() throws IOException {
-
-        Collection<Path> filePathCollection = fileUploadController.getFilePathCollection();
-
-        try (OutputStream outputStream = Files.newOutputStream(sourcePath)) {
-
-            GenoProXmlMerger.merge(filePathCollection, outputStream);
-
-            for (Path filePath : filePathCollection) {
-                Files.deleteIfExists(filePath);
-            }
-
-        } catch (IOException e) {
-            // pass faces message
-        }
     }
 
     public Boolean getUseSampleSource() {

@@ -3,7 +3,7 @@
 
 <!--
 Copyright (c) 2015-present Jan Tošovský <jan.tosovsky.cz@gmail.com>
- 
+
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -43,27 +43,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     margin-right: 20px;
                 }
             </style>
-            <title>Ancestor Tree</title>            
+            <title>Ancestor Tree</title>
         </h:head>
         <h:body>
-
-            <p:notificationBar effect="none" position="top" widgetVar="bar">
-                <h:panelGrid columns="3" width="100%">
-                    <p:commandButton styleClass="buttonClose" icon="close" onclick="PF('bar').hide();" />
-                    <h:panelGroup id="message">Only <a href="http://getfirefox.com">Firefox</a> or <a href="http://www.google.com/chrome">Chrome</a> is supported.</h:panelGroup>
-                    <p:commandButton styleClass="buttonClose" icon="close" onclick="PF('bar').hide();" />
-                </h:panelGrid>
-            </p:notificationBar>
 
             <h2>Ancestor Tree</h2>
 
             <h3>Motivation</h3>
 
-            <p>If you store family trees in separate GenoPro files and you need 
-                to create a report across all of them, the only solution so far 
-                is to merge all files into a single one. If your tree is quite 
-                large, covering various families and from various reasons such an 
-                operation is not an option, you can still generate reports using 
+            <p>If you store family trees in separate GenoPro files and you need
+                to create a report across all of them, the only solution so far
+                is to merge all files into a single one. If your tree is quite
+                large, covering various families and from various reasons such an
+                operation is not an option, you can still generate reports using
                 my app, which merges individual files virtually.</p>
 
             <h3>Usage</h3>
@@ -77,65 +69,62 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <li>Tweak the output in e.g. <a href="https://inkscape.org/">Inkscape</a> editor</li>
             </ol>
 
-            <p>If the output has to be generated from multiple GenoPro files, 
-                they need to be mutually hyperlinked. The linked person has to be 
-                present in both files with three matching attributes - 
-                first name, last name and birth date. All files are supposed to 
+            <p>If the output has to be generated from multiple GenoPro files,
+                they need to be mutually hyperlinked. The linked person has to be
+                present in both files with three matching attributes -
+                first name, last name and birth date. All files are supposed to
                 be located in the same folder, so the external hyperlinks contain
-                just a GenoPro file name (e.g. family.gno), see 
+                just a GenoPro file name (e.g. family.gno), see
                 <a href="https://github.com/drifted-in/genopro-tools/tree/master/src/main/resources/in/drifted/tools/genopro/samples">examples</a>.</p>
 
-            <p>Individuals are sorted by their IDs, prefixed with the file name. 
-                This ID can be found in GenoPro's individual properties dialog, 
+            <p>Individuals are sorted by their IDs, prefixed with the file name.
+                This ID can be found in GenoPro's individual properties dialog,
                 in the Family tab (Permanent ID).</p>
 
-            <p>You can test generating outputs using a default dataset. Please 
-                choose ind00001 as base individual in this case.</p> 
+            <p>You can test generating outputs using a default dataset. Please
+                choose ind00001 as base individual in this case.</p>
 
             <h3>Data Security</h3>
 
-            <p>Any uploaded data is deleted after 30 minutes of inactivity. As 
+            <p>Any uploaded data is deleted after 30 minutes of inactivity. As
                 the server system is regularly updated, there is a very low risk it
                 can be compromised by attacker via any known security hole.</p>
 
-            <p>As secure http (https) is not employed on the server, there is 
-                a potential risk your uploaded data can be eavesdropped by a third 
-                party between two endpoints during the transport.</p>
-
-            <p>The most secure way is to <a href="https://github.com/drifted-in/genopro-tools">build 
+            <p>The most secure way is to <a href="https://github.com/drifted-in/genopro-tools">build
                     the app from source code</a> and run it locally on your computer :-)</p>
 
             <h3>Feedback</h3>
 
-            <p>If you encounter any bug or you would like to have any new 
+            <p>If you encounter any bug or you would like to have any new
                 feature implemented, feel free to <a href="https://github.com/drifted-in/genopro-tools/issues">create
                     a issue</a> on project pages.</p>
 
             <h3>Source File(s)</h3>
 
-            <h:form id="upload" enctype="multipart/form-data">
+<h:form id="upload" enctype="multipart/form-data">
 
-                <p:fileUpload id="fileUpload"
-                              widgetVar="myFileUploader"
-                              onstart="options:setFilesCount([{name:'filesCount', value: PF('myFileUploader').files.length}]);"
-                              fileUploadListener="#{ancestorTreeBean.handleFileUpload}"
-                              mode="advanced"
-                              multiple="true"
-                              sizeLimit="3000000"
-                              allowTypes="/(\.|\/)(xml|gno)$/"/>
+    <p:remoteCommand name="setFilesCount" action="#{ancestorTreeBean.setFilesCount}" />
 
+    <p:fileUpload id="fileUpload"
+                  mode="advanced"
+                  multiple="true"
+                  listener="#{ancestorTreeBean.handleFileUpload}"
+                  update="options"
+                  widgetVar="fileUploader"
+                  onstart="setFilesCount([{name:'filesCount', value: PF('fileUploader').files.length}]);"
+                  sizeLimit="3000000"
+                  allowTypes="/(\.|\/)(xml|gno)$/"/>
+                
                 <h:message for="fileUpload" styleClass="validatingError" />
 
             </h:form>
 
             <h:form id="options" target="_blank">
-
-                <p:remoteCommand name="setFilesCount" action="#{ancestorTreeBean.setActualFilesCount}" />
-
-                <p:commandButton styleClass="button" 
-                                 ajax="false" 
-                                 rendered="#{!ancestorTreeBean.useSampleSource}" 
-                                 action="#{ancestorTreeBean.resetSource}" 
+                
+                <p:commandButton styleClass="button"
+                                 ajax="false"
+                                 rendered="#{!ancestorTreeBean.useSampleSource}"
+                                 action="#{ancestorTreeBean.resetSource}"
                                  value="Use Sample Data"/>
 
                 <h3>Options</h3>
@@ -157,7 +146,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </p:selectOneMenu>
                 </h:panelGrid>
 
-                <p:commandButton action="#{ancestorTreeBean.generate}" 
+                <p:commandButton action="#{ancestorTreeBean.generate}"
                                  ajax="false"
                                  value="Generate Ancestor Tree"/>
 
@@ -174,7 +163,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     }
                 });
                 //]]>
-            </script>            
-        </h:body>        
+            </script>
+        </h:body>
     </f:view>
 </html>
