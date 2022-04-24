@@ -18,7 +18,6 @@ package in.drifted.tools.genopro;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.nio.file.Files;
@@ -54,63 +53,55 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
 
     private static final String SAMPLE_SOURCE_FILE_NAME = "premysl.gno";
     private static final String SAMPLE_SOURCE_FILE_PATH = Constants.RESOURCES_PATH + "samples/" + SAMPLE_SOURCE_FILE_NAME;
+    private static final List<SelectItem> INDIVIDUAL_LIST = new ArrayList<>();
+    private static final Map<String, InputStream> FILE_STREAM_MAP = new HashMap<>();
 
-    private transient Path sourcePath;
-    private transient Path outputFolderPath;
-    private transient Path tempFolderPath;
-    private transient Path ancestorTreePath;
-    private transient Path finalPath;
-    private transient List<SelectItem> individualList;
-    private transient String currentId;
-    private transient Boolean useSampleSource;
-    private transient int generations;
-    private transient int filesCount;
-    private transient Map<String, InputStream> fileStreamMap;
+    private final Path sourcePath;
+    private final Path outputFolderPath;
+    private final Path tempFolderPath;
+    private final Path ancestorTreePath;
+    private final Path finalPath;
+
+    private String currentId;
+    private Boolean useSampleSource;
+    private int generations;
+    private int filesCount;
 
     public AncestorTreeBean() throws IOException {
-        initBean();
-    }
-
-    private void initBean() throws IOException {
-
-        initOutputFolderPath();
 
         sourcePath = Files.createTempFile("merged-", ".xml");
+
+        ServletContext context = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
+        outputFolderPath = Paths.get(context.getRealPath("/output"));
+        if (Files.notExists(outputFolderPath)) {
+            Files.createDirectories(outputFolderPath);
+        }
+
         tempFolderPath = Files.createTempDirectory(AncestorTreeBean.class.getName()).toAbsolutePath();
         ancestorTreePath = Files.createTempFile("ancestor-tree-", ".xml");
         finalPath = Files.createTempFile(outputFolderPath, "ancestor-tree-", ".svg");
-        individualList = new ArrayList<>();
+
+        reset();
+    }
+
+    private void reset() throws IOException {
         currentId = null;
         useSampleSource = true;
         generations = 8;
         filesCount = 0;
-        fileStreamMap = new HashMap<>();
 
         resetSource();
     }
 
-    private void initOutputFolderPath() throws IOException {
-
-        if (outputFolderPath == null) {
-            ServletContext context = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
-            outputFolderPath = Paths.get(context.getRealPath("/output"));
-
-            if (Files.notExists(outputFolderPath)) {
-                Files.createDirectories(outputFolderPath);
-            }
-        }
-    }
-
     private void initSampleSource() throws IOException {
-
-        try (InputStream inputStream = AncestorTreeBean.class.getResourceAsStream(SAMPLE_SOURCE_FILE_PATH)) {
+        try ( InputStream inputStream = AncestorTreeBean.class.getResourceAsStream(SAMPLE_SOURCE_FILE_PATH)) {
             FileUtil.storeFile(SAMPLE_SOURCE_FILE_NAME, inputStream, sourcePath);
         }
     }
 
     private void initIndividualList() {
 
-        individualList.clear();
+        INDIVIDUAL_LIST.clear();
 
         try (InputStream inputStream = Files.newInputStream(sourcePath)) {
 
@@ -128,7 +119,7 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
                     NodeList displayNodeList = individual.getElementsByTagName("Display");
                     if (displayNodeList.getLength() > 0) {
                         String name = displayNodeList.item(0).getTextContent();
-                        individualList.add(new SelectItem(id, id + " [" + name + "]"));
+                        INDIVIDUAL_LIST.add(new SelectItem(id, id + " [" + name + "]"));
                     }
                 }
             }
@@ -137,17 +128,11 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
 
         }
 
-        Collections.sort(individualList, new GenoProIdComparator());
+        Collections.sort(INDIVIDUAL_LIST, new GenoProIdComparator());
 
-        if (!individualList.isEmpty()) {
-            currentId = individualList.get(0).getValue().toString();
+        if (!INDIVIDUAL_LIST.isEmpty()) {
+            currentId = INDIVIDUAL_LIST.get(0).getValue().toString();
         }
-    }
-
-    // restores transient properties when deserialized
-    private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
-        inputStream.defaultReadObject();
-        initBean();
     }
 
     @Override
@@ -156,12 +141,10 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
 
     @Override
     public void valueUnbound(HttpSessionBindingEvent event) {
-
         try {
             Files.deleteIfExists(sourcePath);
             Files.deleteIfExists(finalPath);
             Files.deleteIfExists(tempFolderPath);
-
 
         } catch (IOException e) {
         }
@@ -170,7 +153,7 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
     public void setFilesCount() {
         Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
         filesCount = Integer.valueOf(params.get("filesCount"));
-        fileStreamMap.clear();
+        FILE_STREAM_MAP.clear();
     }
 
     public void resetSource() throws IOException {
@@ -183,12 +166,12 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
 
         UploadedFile file = event.getFile();
         String fileName = file.getFileName().toLowerCase();
-        fileStreamMap.put(fileName, file.getInputStream());
+        FILE_STREAM_MAP.put(fileName, file.getInputStream());
 
-        if (fileStreamMap.size() == filesCount) {
+        if (FILE_STREAM_MAP.size() == filesCount) {
             Collection<Path> filePathCollection = new ArrayList<>();
-            for (Map.Entry<String, InputStream> entry : fileStreamMap.entrySet()) {
-                try (InputStream inputStream = entry.getValue()) {
+            for (Map.Entry<String, InputStream> entry : FILE_STREAM_MAP.entrySet()) {
+                try ( InputStream inputStream = entry.getValue()) {
                     Path targetPath = tempFolderPath.resolve(entry.getKey());
                     FileUtil.storeFile(entry.getKey(), inputStream, targetPath);
                     filePathCollection.add(targetPath);
@@ -235,7 +218,7 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
     }
 
     public List<SelectItem> getIndividualList() {
-        return individualList;
+        return INDIVIDUAL_LIST;
     }
 
     public String getCurrentId() {
