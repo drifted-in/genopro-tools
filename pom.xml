@@ -4,10 +4,8 @@
 
     <groupId>in.drifted</groupId>
     <artifactId>genopro-tools</artifactId>
-    <version>1.0</version>
+    <version>1.0.0</version>
     <packaging>war</packaging>
-
-    <name>genopro-tools</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -32,12 +30,12 @@
         <dependency>
             <groupId>com.sun.faces</groupId>
             <artifactId>jsf-api</artifactId>
-            <version>2.2.12</version>
+            <version>2.2.20</version>
         </dependency>
         <dependency>
             <groupId>com.sun.faces</groupId>
             <artifactId>jsf-impl</artifactId>
-            <version>2.2.12</version>
+            <version>2.2.20</version>
         </dependency>
         <dependency>
             <groupId>jstl</groupId>
@@ -47,7 +45,7 @@
         <dependency>
             <groupId>org.primefaces</groupId>
             <artifactId>primefaces</artifactId>
-            <version>10.0.0</version>
+            <version>11.0.0</version>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.saxon</groupId>
