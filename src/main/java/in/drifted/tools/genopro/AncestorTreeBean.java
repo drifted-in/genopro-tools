@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
@@ -61,6 +62,7 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
     private final Path tempFolderPath;
     private final Path ancestorTreePath;
     private final Path finalPath;
+    private final String googleAnalyticsId;
 
     private String currentId;
     private Boolean useSampleSource;
@@ -80,6 +82,8 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
         tempFolderPath = Files.createTempDirectory(AncestorTreeBean.class.getName()).toAbsolutePath();
         ancestorTreePath = Files.createTempFile("ancestor-tree-", ".xml");
         finalPath = Files.createTempFile(outputFolderPath, "ancestor-tree-", ".svg");
+
+        googleAnalyticsId = loadGoogleAnalyticsId();
 
         reset();
     }
@@ -133,6 +137,17 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
         if (!INDIVIDUAL_LIST.isEmpty()) {
             currentId = INDIVIDUAL_LIST.get(0).getValue().toString();
         }
+    }
+
+    private static String loadGoogleAnalyticsId() {
+        try ( InputStream inputStream = AncestorTreeBean.class.getResourceAsStream("/google-analytics.properties")) {
+            Properties properties = new Properties();
+            properties.load(inputStream);
+            return properties.getProperty("id");
+
+        } catch (Exception e) {
+        }
+        return null;
     }
 
     @Override
@@ -235,5 +250,9 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
 
     public void setGenerations(int generations) {
         this.generations = generations;
+    }
+
+    public String getGoogleAnalyticsId() {
+        return googleAnalyticsId;
     }
 }
