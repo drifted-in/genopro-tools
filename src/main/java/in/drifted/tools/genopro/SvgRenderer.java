@@ -16,7 +16,7 @@
  */
 package in.drifted.tools.genopro;
 
-import in.drifted.util.Xslt20ProcessorUtil;
+import in.drifted.tools.xslt.Transformer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,7 +34,7 @@ public class SvgRenderer {
                 InputStream xsltInputStream = SvgRenderer.class.getResourceAsStream(XSLT_SVG_RENDERER);
                 InputStream xmlInputStream = Files.newInputStream(sourcePath)) {
 
-            Xslt20ProcessorUtil.transform(xsltInputStream, xmlInputStream, outputStream, parameterMap);
+            Transformer.transform(xsltInputStream, xmlInputStream, outputStream, parameterMap);
         }
     }
 }

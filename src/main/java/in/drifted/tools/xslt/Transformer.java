@@ -14,21 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package in.drifted.util;
+package in.drifted.tools.xslt;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-public class Xslt20ProcessorUtil {
+public class Transformer {
 
     public static boolean transform(InputStream xsltInputStream, InputStream xmlInputStream, OutputStream outputStream, Map<String, Object> parameterMap) {
 
@@ -37,7 +36,7 @@ public class Xslt20ProcessorUtil {
         try {
 
             Source source = new StreamSource(xsltInputStream);
-            Transformer transformer = TransformerFactory.newInstance().newTemplates(source).newTransformer();
+            javax.xml.transform.Transformer transformer = TransformerFactory.newInstance().newTemplates(source).newTransformer();
 
             for (Entry<String, Object> entry : parameterMap.entrySet()) {
                 transformer.setParameter(entry.getKey(), entry.getValue());

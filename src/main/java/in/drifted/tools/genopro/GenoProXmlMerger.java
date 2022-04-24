@@ -16,7 +16,7 @@
  */
 package in.drifted.tools.genopro;
 
-import in.drifted.util.Xslt20ProcessorUtil;
+import in.drifted.tools.xslt.Transformer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -56,7 +56,7 @@ public class GenoProXmlMerger {
                 Map<String, Object> parameterMap = new HashMap<>();
                 parameterMap.put("parts", String.join(";", fileNameList));
 
-                Xslt20ProcessorUtil.transform(xsltInputStream, xmlInputStream, outputStream, parameterMap);
+                Transformer.transform(xsltInputStream, xmlInputStream, outputStream, parameterMap);
             }
         }
     }
