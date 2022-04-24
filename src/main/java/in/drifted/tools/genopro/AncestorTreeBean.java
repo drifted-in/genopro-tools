@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (c) 2015-present Jan Tošovský <jan.tosovsky.cz@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -66,7 +66,7 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
     private transient int generations;
     private transient int filesCount;
     private transient Map<String, InputStream> fileStreamMap;
-    
+
     public AncestorTreeBean() throws IOException {
         initBean();
     }
@@ -184,7 +184,7 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
         UploadedFile file = event.getFile();
         String fileName = file.getFileName().toLowerCase();
         fileStreamMap.put(fileName, file.getInputStream());
-        
+
         if (fileStreamMap.size() == filesCount) {
             Collection<Path> filePathCollection = new ArrayList<>();
             for (Map.Entry<String, InputStream> entry : fileStreamMap.entrySet()) {
@@ -192,7 +192,7 @@ public final class AncestorTreeBean implements Serializable, HttpSessionBindingL
                     Path targetPath = tempFolderPath.resolve(entry.getKey());
                     FileUtil.storeFile(entry.getKey(), inputStream, targetPath);
                     filePathCollection.add(targetPath);
-                }   
+                }
             }
             try (OutputStream outputStream = Files.newOutputStream(sourcePath)) {
                 GenoProXmlMerger.merge(filePathCollection, outputStream);

@@ -114,13 +114,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   onstart="setFilesCount([{name:'filesCount', value: PF('fileUploader').files.length}]);"
                   sizeLimit="3000000"
                   allowTypes="/(\.|\/)(xml|gno)$/"/>
-                
+
                 <h:message for="fileUpload" styleClass="validatingError" />
 
             </h:form>
 
             <h:form id="options" target="_blank">
-                
                 <p:commandButton styleClass="button"
                                  ajax="false"
                                  rendered="#{!ancestorTreeBean.useSampleSource}"
