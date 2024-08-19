@@ -33,9 +33,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </GenoPro>
    </xsl:template>
 
-   <xsl:template match="Software|GenoPro/Date|Global|GenoMaps|Places|Occupations|Bookmarks|Twins|Labels"/>
-   <xsl:template match="Individual/Position|Individual/Display|Individual/Comment|Individual/child_no"/>
-   <xsl:template match="Birth/Comment|Death/Comment"/>
+   <xsl:template match="Software|GenoPro/Date|Global|GenoMaps|Places|Contacts|Occupations|Bookmarks|Twins|Labels|Shapes"/>
+   <xsl:template match="Individual/Position|Individual/Display|Individual/Comment|Individual/child_no|Individual/Name/Display"/>
+   <xsl:template match="Individual/Name/text()[1]"/>
+   <xsl:template match="Birth/Comment|Death/Comment|Family/Comment|Marriage/Comment"/>
+   <xsl:template match="Birth/Place|Death/Place|Marriage/Place"/>
    <xsl:template match="Family/Position"/>
    <xsl:template match="PedigreeLink/Position"/>
 
