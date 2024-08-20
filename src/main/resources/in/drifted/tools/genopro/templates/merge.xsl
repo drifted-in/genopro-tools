@@ -69,5 +69,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
          </xsl:apply-templates>
       </xsl:copy>
    </xsl:template>
+   
+   <xsl:template match="Unions">
+      <xsl:param name="prefix"/>
+      <xsl:copy>
+         <xsl:value-of select="concat($prefix, '-', .)"/>
+      </xsl:copy>
+   </xsl:template>
 
 </xsl:stylesheet>
